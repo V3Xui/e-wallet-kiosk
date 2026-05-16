@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiosk Admin Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 20px; }
+        .dashboard-container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; text-align: center; }
+        .total-cash { font-size: 2.5rem; color: #28a745; text-align: center; font-weight: bold; margin: 20px 0; }
+        .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center; margin-bottom: 30px; }
+        .card { background: #e9ecef; padding: 15px; border-radius: 8px; }
+        .card h3 { margin: 0 0 10px 0; font-size: 1.2rem; }
+        .card p { font-size: 1.5rem; font-weight: bold; margin: 0; color: #007bff; }
+        .refill-section { border-top: 2px solid #eee; padding-top: 20px; }
+        .input-group { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .input-group input { width: 60px; padding: 5px; text-align: center; }
+        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #0056b3; }
+        .status { text-align: center; margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <h1>Vault Status</h1>
+    
+    <div class="total-cash" id="total-value">₱0.00</div>
+
+    <div class="inventory-grid">
+        <div class="card">
+            <h3>₱100 Bills</h3>
+            <p id="count-100">0</p>
+        </div>
+        <div class="card">
+            <h3>₱50 Bills</h3>
+            <p id="count-50">0</p>
+        </div>
+        <div class="card">
+            <h3>₱20 Coins</h3>
+            <p id="count-20">0</p>
+        </div>
+    </div>
+
+    <div class="refill-section">
+        <h3>Refill Machine</h3>
+        <p style="font-size: 0.9rem; color: #666;">Set the exact quantities currently loaded in the cartridge.</p>
+        
+        <div class="input-group">
+            <label>₱100 Bills:</label>
+            <input type="number" id="refill-100" min="0">
+        </div>
+        <div class="input-group">
+            <label>₱50 Bills:</label>
+            <input type="number" id="refill-50" min="0">
+        </div>
+        <div class="input-group">
+            <label>₱20 Coins:</label>
+            <input type="number" id="refill-20" min="0">
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button onclick="submitInventory('add')" style="flex: 2;">➕ Add to Stock</button>
+            <button onclick="submitInventory('set')" style="flex: 1; background: #ffc107; color: #000;">✏️ Set Exact Count</button>
+        </div>
+        <p class="status" id="status-msg"></p>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000";
+
+    async function fetchInventory() {
+        try {
+            // NOTE: I added the trailing slash back to /inventory/ here 
+            // to stop those "307 Temporary Redirect" warnings in your terminal!
+            const response = await fetch(`${API_URL}/inventory/`);
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Update Dashboard UI (The big display numbers)
+                document.getElementById("total-value").innerText = `₱${data.total_value.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                document.getElementById("count-100").innerText = data.bill_100;
+                document.getElementById("count-50").innerText = data.bill_50;
+                document.getElementById("count-20").innerText = data.coin_20;
+
+                // ❌ WE REMOVED THE PRE-FILL LINES HERE SO IT STOPS ERASING YOUR TYPING!
+            }
+        } catch (error) {
+            console.error("Error fetching inventory:", error);
+            document.getElementById("status-msg").innerText = "❌ Cannot connect to backend.";
+            document.getElementById("status-msg").style.color = "red";
+        }
+    }
+
+    async function submitInventory(actionType) {
+        const b100 = parseInt(document.getElementById("refill-100").value) || 0;
+        const b50 = parseInt(document.getElementById("refill-50").value) || 0;
+        const c20 = parseInt(document.getElementById("refill-20").value) || 0;
+
+        // Double-check for the dangerous "Set" command
+        if (actionType === 'set') {
+            const confirmOverwrite = confirm("⚠️ WARNING: This will OVERWRITE the current inventory to exactly the numbers you typed. Proceed?");
+            if (!confirmOverwrite) return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/inventory/refill`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                // Notice we are passing the actionType ('add' or 'set') to the backend now!
+                body: JSON.stringify({ bill_100: b100, bill_50: b50, coin_20: c20, action: actionType })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const statusMsg = document.getElementById("status-msg");
+                
+                statusMsg.innerText = `✅ ${data.message}`;
+                statusMsg.style.color = "green";
+                setTimeout(() => statusMsg.innerText = "", 4000);
+                
+                // Clear the boxes
+                document.getElementById("refill-100").value = "";
+                document.getElementById("refill-50").value = "";
+                document.getElementById("refill-20").value = "";
+
+                fetchInventory(); // Refresh the UI
+            }
+        } catch (error) {
+            console.error("Error updating inventory:", error);
+        }
+    }
+    
+    // Auto-refresh the dashboard every 10 seconds to catch live cashouts
+    setInterval(fetchInventory, 3000);
+</script>
+
+</body>
+</html>

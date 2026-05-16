@@ -1,0 +1,431 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&display=swap');
+
+:root {
+    --primary: #00dfff;
+    --secondary: #f4f4f4;
+    --accent: #cccccc;
+    --text: #333;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    background-color: #cfdef3;
+}
+
+.kiosk-container {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    width: 90%;
+    max-width: 650px;
+    height: 90%;
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+/* Section Display Logic */
+.kiosk-section {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    padding: 10px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.kiosk-section.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Idle Screen */
+#sec-idle {
+    cursor: pointer;
+    background: linear-gradient(135deg, #00dfff 0%, #007bff 100%);
+    color: white;
+}
+
+.bx-flashing {
+    font-size: 80px;
+    margin: 20px;
+}
+
+/* Numpad / Matrix */
+.matrix {
+    display: grid;
+    grid-template-columns: repeat(3, 80px);
+    gap: 10px;
+    justify-content: center;
+}
+
+.matrix button {
+    height: 50px;
+    font-size: 24px;
+    border-radius: 20%;
+    border: 1px solid var(--accent);
+    background: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.matrix button:active {
+    background: var(--primary);
+    color: white;
+}
+
+.keypad-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.qr-placeholder {
+    transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+.qr-placeholder img{
+    width: 100%;
+    height: auto;
+    max-width: 300px;
+    margin: 0 150px;
+}
+
+.qr-placeholder.blurred {
+    filter: blur(15px);
+    opacity: 0.6;
+}
+
+.quick-amounts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.quick-amounts button {
+    width: 80px;
+    height: 50px; /* Matches the matrix row height */
+    font-size: 20px;
+    font-weight: 600;
+    border-radius: 15px;
+    border: 2px solid var(--primary);
+    background: #e3f2fd; /* A soft blue to distinguish them */
+    color: var(--text);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.quick-amounts button:active {
+    background: var(--primary);
+    color: white;
+}
+
+/* Inputs & Buttons */
+input[type="number"] {
+    width: 80%;
+    padding: 15px;
+    font-size: 32px;
+    text-align: center;
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.btn-group {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-around;
+}
+
+button.btn-next,
+button.btn-prev {
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-next {
+    background: var(--primary);
+    color: black;
+    font-weight: bold;
+}
+
+.btn-prev {
+    background-color: gray;
+    color: white;
+    font-weight: bold;
+}
+
+.menu-grid {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px;
+    margin: 10px;
+    /* background-color: red; */
+}
+
+.menu-card {
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px;
+}
+
+/* This targets any menu card that has the 'disabled' attribute */
+.menu-card:disabled {
+    background-color: #e0e0e0;
+    color: #888;
+    border: 2px dashed #bbb;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Stop the disabled buttons from animating if someone clicks them */
+.menu-card:disabled:active {
+    transform: none;
+    background-color: #e0e0e0;
+}
+
+/* --- PROGRESS BAR STYLES --- */
+.progress-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 85%;
+    margin: 20px auto 0;
+    padding: 10px 0;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.step .circle {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: var(--secondary);
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: 0.3s ease;
+    border: 3px solid white;
+}
+
+.step.active .circle {
+    background-color: var(--primary);
+    color: black;
+    box-shadow: 0 0 0 4px rgba(0, 223, 255, 0.3);
+}
+
+.step.completed .circle {
+    background-color: #007bff;
+    color: white;
+}
+
+.step .label {
+    font-size: 12px;
+    margin-top: 5px;
+    color: #888;
+    font-weight: 500;
+}
+
+.step.active .label,
+.step.completed .label {
+    color: var(--text);
+    font-weight: bold;
+}
+
+.line {
+    flex: 1;
+    height: 4px;
+    background-color: var(--secondary);
+    margin: 0 -5px;
+    position: relative;
+    top: -10px;
+    /* Aligns with the circles */
+    z-index: 1;
+    transition: 0.3s ease;
+}
+
+.line.active {
+    background-color: #007bff;
+}
+
+/* --- CUSTOM ALERT MODAL --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6); /* Dark semi-transparent background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999; /* Forces it to the very top layer */
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.modal-box {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    width: 80%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease-out;
+}
+
+.modal-box h2 {
+    margin: 10px 0;
+    color: var(--text);
+}
+
+.modal-box p {
+    color: #666;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* --- 7-INCH SCREEN RESPONSIVENESS (1024x600 or 800x480) --- */
+@media (max-height: 650px),
+(max-width: 800px) {
+    .kiosk-container {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        /* Remove rounded corners for full screen */
+    }
+
+    .kiosk-section {
+        padding: 15px 10px;
+        /* Reduce padding to fit content */
+    }
+
+    /* Shrink the numpad to fit small vertical space */
+    .matrix {
+        grid-template-columns: repeat(3, 65px);
+        gap: 10px;
+        margin: 10px 0;
+    }
+
+    .matrix button {
+        height: 65px;
+        font-size: 20px;
+    }
+
+    /* Shrink inputs and headers */
+    input[type="number"] {
+        padding: 10px;
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+
+    header h1 {
+        font-size: 22px;
+    }
+
+    header p {
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    .bx-qr-scan {
+        font-size: 120px !important;
+    }
+
+    .menu-grid {
+        padding: 5px;
+        margin: 5px;
+    }
+
+    .menu-card {
+        padding: 5px;
+        margin: 5px;
+    }
+
+    .menu-card i {
+        font-size: 40px !important;
+    }
+
+    .progress-container {
+        /* margin: 10px auto 0; */
+        width: 90%;
+    }
+
+    .step .circle {
+        width: 30px;
+        height: 30px;
+    }
+
+    .step .label {
+        font-size: 10px;
+    }
+
+    .keypad-wrapper {
+        gap: 10px;
+    }
+
+    .quick-amounts button {
+        width: 70px;
+        height: 65px; /* Matches the 65px matrix button height for small screens */
+        font-size: 18px;
+    }
+
+    footer {
+        padding: 10px;
+        font-size: 10px;
+    }
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #e3f2fd;
+    font-size: 12px;
+}

@@ -1,0 +1,19 @@
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# Environment Variables / Secrets
+.env
+
+# Python caching
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Editor and System settings
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
