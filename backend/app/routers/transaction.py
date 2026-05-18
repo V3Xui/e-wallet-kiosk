@@ -9,6 +9,7 @@ from app.models.transaction import Transaction
 from app.schemas.transaction import TransactionCreate, TransactionResponse
 from app.services.paymongo import create_qrph_payment, get_payment_intent_status, cancel_payment_intent
 from app.services.dispenser import calculate_bills
+from app.services.hardware import send_dispense_command
 from app.models.inventory import Inventory
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
@@ -85,6 +86,9 @@ async def paymongo_webhook(request: Request):
                             inv.coin_20 -= t20
                         
                         db.commit()
+                        
+                        # 🚀 NEW: SHIP COMMAND DOWN THE USB CABLE TO THE ARDUINO UNO!
+                        send_dispense_command(h100, f50, t20)
                         
                         # Hardware Execution Log
                         print(f"✅ Webhook Success: Transaction {tx.id} marked as PAID.")

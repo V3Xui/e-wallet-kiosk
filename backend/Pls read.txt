@@ -1,0 +1,30 @@
+Terminal 1: Start the FastAPI Backend
+Open your first PowerShell window.
+
+Navigate to your project directory:
+
+PowerShell
+cd "C:\Users\Asus\Desktop\e-wallet kiosk"
+Activate your Python virtual environment:
+
+PowerShell
+.\venv\Scripts\Activate.ps1
+Fire up the Uvicorn server:
+
+PowerShell
+uvicorn app.main:app --reload --app-dir backend
+Terminal 2: Start the Cloudflare Quick Tunnel
+Open a second, separate PowerShell window.
+
+Run your direct-path command to launch the temporary tunnel:
+
+PowerShell
+& "C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel --url http://localhost:8000
+⚠️ Crucial Step After Restarting!
+Because this is a free Quick Tunnel, Cloudflare will generate a brand-new random URL every time you launch it (for example: https://something-new.trycloudflare.com).
+
+To make sure your payment flow doesn't get stuck, remember to do these two quick updates with the new link:
+
+Update your .env file: Change BASE_URL to match the brand-new .trycloudflare.com link.
+
+Update your PayMongo Webhook: Go to your PayMongo Dashboard, edit your active webhook, and paste the new URL with the /transactions/webhook path at the end
