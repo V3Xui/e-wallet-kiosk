@@ -1,30 +1,68 @@
-Terminal 1: Start the FastAPI Backend
+========================================================================
+       QRPh MICRO-CASHOUT KIOSK — LOCAL DEVELOPMENT RUNTIME GUIDE
+========================================================================
+
+This guide maps out how to initialize and run the synchronized development 
+environment on your local PC before committing updates via Git to the 
+Raspberry Pi production runtime.
+
+------------------------------------------------------------------------
+👉 SYSTEM ARCHITECTURE LAYOUT
+------------------------------------------------------------------------
+Your codebase must follow the standardized project layout:
+project/
+├── frontend/          # UI Assets (HTML, Vanilla JS, CSS)
+├── backend/           # FastAPI Core Application & State Engine
+├── arduino/           # Mega Controller Firmware
+├── instructions.txt   # This execution manual
+└── .gitignore         # Prevents committing venv and sensitive .env files
+
+------------------------------------------------------------------------
+🚀 WORKFLOW TERMINAL 1: START THE FASTAPI BACKEND
+------------------------------------------------------------------------
 Open your first PowerShell window.
 
-Navigate to your project directory:
+1. Navigate to your standardized backend directory:
+   cd "C:\Users\Asus\Desktop\e-wallet kiosk\backend"
 
-PowerShell
-cd "C:\Users\Asus\Desktop\e-wallet kiosk"
-Activate your Python virtual environment:
+2. Activate your isolated Python virtual environment:
+   .\venv\Scripts\Activate.ps1
 
-PowerShell
-.\venv\Scripts\Activate.ps1
-Fire up the Uvicorn server:
+3. Launch your local Uvicorn development server:
+   uvicorn app.main:app --reload --app-dir backend
 
-PowerShell
-uvicorn app.main:app --reload --app-dir backend
-Terminal 2: Start the Cloudflare Quick Tunnel
-Open a second, separate PowerShell window.
+   * Note: The --reload flag automatically applies code changes on save.
+   * Verify your local server is running by hitting: http://127.0.0.1:8000/docs
 
-Run your direct-path command to launch the temporary tunnel:
+------------------------------------------------------------------------
+🌐 WORKFLOW TERMINAL 2: LAUNCH THE STATIC PUBLIC TUNNEL
+------------------------------------------------------------------------
+Open a second, separate PowerShell window. This acts as your secure gateway 
+bridging the public internet to your local PC without firewall disruptions.
 
-PowerShell
-& "C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel --url http://localhost:8000
-⚠️ Crucial Step After Restarting!
-Because this is a free Quick Tunnel, Cloudflare will generate a brand-new random URL every time you launch it (for example: https://something-new.trycloudflare.com).
+1. Initialize the global localtunnel engine pointing to your local server:
+   npx localtunnel --port 8000 --subdomain pup-qrph-kiosk
 
-To make sure your payment flow doesn't get stuck, remember to do these two quick updates with the new link:
+   * If prompted to install 'localtunnel', press 'y' and hit Enter.
+   * This command binds your system to a permanent development URL:
+     👉 https://pup-qrph-kiosk.localtunnel.me
 
-Update your .env file: Change BASE_URL to match the brand-new .trycloudflare.com link.
+------------------------------------------------------------------------
+✅ PERMANENT CONFIGURATION ADVANTAGE (NO RECONFIG REQUIRED)
+------------------------------------------------------------------------
+Because we have established a named, static subdomain (`pup-qrph-kiosk`), 
+you NO LONGER need to modify settings every time you boot your computer.
 
-Update your PayMongo Webhook: Go to your PayMongo Dashboard, edit your active webhook, and paste the new URL with the /transactions/webhook path at the end
+The values below remain permanent for the lifecycle of Phase 1 and Phase 2:
+
+1. Static Environment Configuration (.env):
+   Your backend .env file configuration remains unmutated:
+   BASE_URL=https://yellow-squid-100.loca.lt
+
+2. Permanent PayMongo Webhook Endpoint:
+   Your PayMongo developer webhook target is locked in once and for all at:
+   URL Target: https://yellow-squid-100.loca.lt/transactions/webhook
+
+You are safe to close terminals, reboot your PC, or modify backend logic. 
+Simply re-run Terminals 1 and 2 to restore your exact sandbox ecosystem instantly.
+========================================================================

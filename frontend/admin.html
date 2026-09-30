@@ -6,25 +6,79 @@
     <title>Kiosk Admin Dashboard</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 20px; }
-        .dashboard-container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .dashboard-container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         h1 { color: #333; text-align: center; }
+        
+        /* Dashboard Styles */
         .total-cash { font-size: 2.5rem; color: #28a745; text-align: center; font-weight: bold; margin: 20px 0; }
         .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center; margin-bottom: 30px; }
         .card { background: #e9ecef; padding: 15px; border-radius: 8px; }
         .card h3 { margin: 0 0 10px 0; font-size: 1.2rem; }
         .card p { font-size: 1.5rem; font-weight: bold; margin: 0; color: #007bff; }
         .refill-section { border-top: 2px solid #eee; padding-top: 20px; }
+        
+        /* Inputs and Buttons */
         .input-group { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .input-group input { width: 60px; padding: 5px; text-align: center; }
-        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
+        .input-group input, .login-input { padding: 10px; text-align: center; border: 1px solid #ccc; border-radius: 5px; }
+        .input-group input { width: 60px; }
+        .login-input { width: 100%; font-size: 2rem; margin-bottom: 15px; letter-spacing: 5px; box-sizing: border-box; }
+        
+        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 1.1rem; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
         button:hover { background: #0056b3; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
+        
+        /* Numpad Styles */
+        .login-wrapper { display: flex; gap: 40px; align-items: center; justify-content: center; }
+        .login-left { flex: 1; text-align: center; }
+        .numpad { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .num-btn { background: #e9ecef; color: #333; font-size: 1.5rem; font-weight: bold; padding: 15px 0; margin: 0; border-radius: 8px; }
+        .num-btn:hover { background: #d3d9df; }
+        .action-btn { background: #007bff; color: #000; }
+        .action-btn:hover { background: #007bff; }
+
         .status { text-align: center; margin-top: 15px; font-weight: bold; }
+        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-<div class="dashboard-container">
-    <h1>Vault Status</h1>
+<!-- LOGIN SCREEN -->
+<div class="dashboard-container" id="login-screen" style="margin-top: 10vh;">
+    <div class="login-wrapper">
+        <div class="login-left">
+            <h1 style="margin-top: 0;">Admin Access</h1>
+            <p>Enter PIN to unlock.</p>
+            <!-- readonly prevents the on-screen keyboard from opening -->
+            <input type="password" id="admin-pin" class="login-input" placeholder="•••••" readonly>
+            <button onclick="verifyPin()">Unlock</button>
+            <button class="btn-secondary" onclick="window.location.href='/'">⬅ Back to Kiosk</button>
+            <p class="status" id="login-error" style="color: red; min-height: 24px; margin: 5px 0 0 0;"></p>
+        </div>
+        
+        <div class="numpad">
+            <button class="num-btn" onclick="appendPin('1')">1</button>
+            <button class="num-btn" onclick="appendPin('2')">2</button>
+            <button class="num-btn" onclick="appendPin('3')">3</button>
+            <button class="num-btn" onclick="appendPin('4')">4</button>
+            <button class="num-btn" onclick="appendPin('5')">5</button>
+            <button class="num-btn" onclick="appendPin('6')">6</button>
+            <button class="num-btn" onclick="appendPin('7')">7</button>
+            <button class="num-btn" onclick="appendPin('8')">8</button>
+            <button class="num-btn" onclick="appendPin('9')">9</button>
+            <button class="num-btn action-btn" onclick="clearPin()">C</button>
+            <button class="num-btn" onclick="appendPin('0')">0</button>
+            <button class="num-btn action-btn" onclick="deletePin()">⌫</button>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN DASHBOARD (Hidden by Default) -->
+<div class="dashboard-container" id="dashboard-content" style="display: none;">
+    <div class="header-actions">
+        <button class="btn-secondary" onclick="window.location.href='/'" style="width: auto; padding: 8px 15px; margin: 0;">⬅ Exit Admin</button>
+        <h1 style="margin: 0; flex-grow: 1;">Vault Status</h1>
+    </div>
     
     <div class="total-cash" id="total-value">₱0.00</div>
 
@@ -61,31 +115,86 @@
         </div>
         
         <div style="display: flex; gap: 10px;">
-            <button onclick="submitInventory('add')" style="flex: 2;">➕ Add to Stock</button>
-            <button onclick="submitInventory('set')" style="flex: 1; background: #ffc107; color: #000;">✏️ Set Exact Count</button>
+            <button onclick="submitInventory('add')" style="flex: 2; margin-bottom: 0;">➕ Add to Stock</button>
+            <button onclick="submitInventory('set')" style="flex: 1; background: #ffc107; color: #000; margin-bottom: 0;">✏️ Set Exact</button>
         </div>
         <p class="status" id="status-msg"></p>
     </div>
 </div>
 
 <script>
-    const API_URL = "http://127.0.0.1:8000";
+    // --- NUMPAD LOGIC ---
+    function appendPin(num) {
+        const pinInput = document.getElementById("admin-pin");
+        if (pinInput.value.length < 5) {
+            pinInput.value += num;
+        }
+    }
+
+    function clearPin() {
+        document.getElementById("admin-pin").value = "";
+    }
+
+    function deletePin() {
+        const pinInput = document.getElementById("admin-pin");
+        pinInput.value = pinInput.value.slice(0, -1);
+    }
+
+    // --- LOGIN LOGIC ---
+    let refreshInterval;
+
+    async function verifyPin() {
+        const pinInput = document.getElementById("admin-pin").value;
+        const errorMsg = document.getElementById("login-error");
+        
+        try {
+            // Send the typed PIN to Python for verification
+            const response = await fetch(`${API_URL}/api/verify-pin`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pin: pinInput })
+            });
+
+            if (response.ok) { 
+                // Python said the PIN is correct
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("dashboard-content").style.display = "block";
+                
+                fetchInventory();
+                refreshInterval = setInterval(fetchInventory, 3000);
+            } else {
+                // Python rejected the PIN (401 Unauthorized)
+                errorMsg.innerText = "❌ Incorrect PIN.";
+                document.getElementById("admin-pin").value = "";
+                setTimeout(() => errorMsg.innerText = "", 2000);
+            }
+        } catch (error) {
+            console.error("Connection error:", error);
+            errorMsg.innerText = "❌ Server disconnected.";
+        }
+    }
+    
+    // Allow hardware keyboard "Enter" in case testing on PC
+    document.addEventListener("keypress", function(event) {
+        if (event.key === "Enter" && document.getElementById("login-screen").style.display !== "none") {
+            event.preventDefault();
+            verifyPin();
+        }
+    });
+
+    // --- DASHBOARD LOGIC ---
+    const API_URL = ""; 
 
     async function fetchInventory() {
         try {
-            // NOTE: I added the trailing slash back to /inventory/ here 
-            // to stop those "307 Temporary Redirect" warnings in your terminal!
             const response = await fetch(`${API_URL}/inventory/`);
             if (response.ok) {
                 const data = await response.json();
                 
-                // Update Dashboard UI (The big display numbers)
                 document.getElementById("total-value").innerText = `₱${data.total_value.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
                 document.getElementById("count-100").innerText = data.bill_100;
                 document.getElementById("count-50").innerText = data.bill_50;
                 document.getElementById("count-20").innerText = data.coin_20;
-
-                // ❌ WE REMOVED THE PRE-FILL LINES HERE SO IT STOPS ERASING YOUR TYPING!
             }
         } catch (error) {
             console.error("Error fetching inventory:", error);
@@ -99,7 +208,6 @@
         const b50 = parseInt(document.getElementById("refill-50").value) || 0;
         const c20 = parseInt(document.getElementById("refill-20").value) || 0;
 
-        // Double-check for the dangerous "Set" command
         if (actionType === 'set') {
             const confirmOverwrite = confirm("⚠️ WARNING: This will OVERWRITE the current inventory to exactly the numbers you typed. Proceed?");
             if (!confirmOverwrite) return;
@@ -109,7 +217,6 @@
             const response = await fetch(`${API_URL}/inventory/refill`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                // Notice we are passing the actionType ('add' or 'set') to the backend now!
                 body: JSON.stringify({ bill_100: b100, bill_50: b50, coin_20: c20, action: actionType })
             });
 
@@ -121,20 +228,16 @@
                 statusMsg.style.color = "green";
                 setTimeout(() => statusMsg.innerText = "", 4000);
                 
-                // Clear the boxes
                 document.getElementById("refill-100").value = "";
                 document.getElementById("refill-50").value = "";
                 document.getElementById("refill-20").value = "";
 
-                fetchInventory(); // Refresh the UI
+                fetchInventory(); 
             }
         } catch (error) {
             console.error("Error updating inventory:", error);
         }
     }
-    
-    // Auto-refresh the dashboard every 10 seconds to catch live cashouts
-    setInterval(fetchInventory, 3000);
 </script>
 
 </body>
